@@ -14,6 +14,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.cyrilmaquaire.curriculum.ui.screens.fontAntonioFamily
@@ -23,13 +24,15 @@ private val DarkColorScheme = darkColorScheme(
     secondary = PurpleGrey80,
     tertiary = Pink80,
     primaryContainer = FenstonBlue,
+    onPrimary = Color.White
+
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = FenstonBlue,
     secondary = PurpleGrey40,
     tertiary = Pink40,
-    primaryContainer = FenstonBlueLight
+    primaryContainer = FenstonBlueLight,
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),

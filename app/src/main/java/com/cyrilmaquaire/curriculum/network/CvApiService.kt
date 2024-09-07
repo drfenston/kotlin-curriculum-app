@@ -16,39 +16,67 @@
 
 package com.cyrilmaquaire.curriculum.network
 
-import com.cyrilmaquaire.curriculum.model.Cv
+import com.cyrilmaquaire.curriculum.model.requests.LoginRequest
+import com.cyrilmaquaire.curriculum.model.responses.GetAllCvResponse
+import com.cyrilmaquaire.curriculum.model.responses.GetCvResponse
+import com.cyrilmaquaire.curriculum.model.responses.LoginResponse
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
 
-    private const val BASE_URL =
-        "https://cyrilmaquaire.com/curriculum/api/"
 
-    /**
-     * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
-     */
-    private val retrofit = Retrofit.Builder()
+private const val BASE_URL =
+    "https://cyrilmaquaire.com/curriculum/api/"
+
+
+fun getClient(): Retrofit {
+
+    val logging = HttpLoggingInterceptor()
+
+    // set your desired log level
+    logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+    val httpClient: OkHttpClient.Builder = OkHttpClient.Builder()
+
+
+    // add your other interceptors …
+    // add logging as last interceptor
+    httpClient.addInterceptor(logging)
+
+    return Retrofit.Builder()
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl(BASE_URL)
+        .client(httpClient.build())
         .build()
+}
 
-    /**
-     * Retrofit service object for creating api calls
-     */
-    interface CvApiService {
-        @GET("CV/2")
-        suspend fun getCV(): Cv
+/**
+ * Retrofit service object for creating api calls
+ */
+interface CvApiService {
+    @GET("CV")
+    suspend fun getAllCV(): GetAllCvResponse
+
+    @GET("CV/{id}")
+    suspend fun getCV(@Path("id") id: Long?): GetCvResponse
+
+    @POST("Login")
+    suspend fun login(@Body loginResquest: LoginRequest): LoginResponse
+}
+
+/**
+ * A public Api object that exposes the lazy-initialized Retrofit service
+ */
+object CvApi {
+    val retrofitService: CvApiService by lazy {
+        getClient().create(CvApiService::class.java)
     }
-
-    /**
-     * A public Api object that exposes the lazy-initialized Retrofit service
-     */
-    object CvApi {
-        val retrofitService: CvApiService by lazy {
-            retrofit.create(CvApiService::class.java)
-        }
 }

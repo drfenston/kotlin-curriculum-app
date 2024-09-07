@@ -45,6 +45,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -62,12 +64,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.cyrilmaquaire.curriculum.R
+import com.cyrilmaquaire.curriculum.data.LoadingStates
 import com.cyrilmaquaire.curriculum.model.Autre
 import com.cyrilmaquaire.curriculum.model.CompetenceTechnique
-import com.cyrilmaquaire.curriculum.model.Data
 import com.cyrilmaquaire.curriculum.model.Experience
 import com.cyrilmaquaire.curriculum.model.Formation
 import com.cyrilmaquaire.curriculum.model.Langue
+import com.cyrilmaquaire.curriculum.model.responses.GetCvResponse
+import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvViewModel
 import com.cyrilmaquaire.curriculum.provider
 import com.cyrilmaquaire.curriculum.ui.elements.LinkText
 import com.cyrilmaquaire.curriculum.ui.elements.LinkTextData
@@ -89,18 +93,32 @@ val fontAntonioFamily = FontFamily(
 )
 
 @Composable
-fun HomeScreen(
-    cvUiState: CvUiState, modifier: Modifier = Modifier
+fun ProfileScreen(
+    userId: Long?, viewModel: GetCvViewModel, modifier: Modifier = Modifier
 ) {
-    when (cvUiState) {
-        is CvUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-        is CvUiState.Success -> cvUiState.cvData?.let {
-            ResultScreen(
-                it, modifier = modifier.fillMaxWidth()
-            )
-        }
+    val cv = viewModel.cv.collectAsState()
+    // Variables qui changeront d'état lors du chargement des données
+    val loadingState = viewModel.loadingState.collectAsState()
 
-        is CvUiState.Error -> ErrorScreen(modifier = modifier.fillMaxSize())
+    LaunchedEffect(Unit) {
+        userId?.let { viewModel.getCV(it) }
+    }
+
+    when (loadingState.value) {
+        LoadingStates.LOADING -> {
+            // Affichage d'un loader
+            LoadingScreen()
+        }
+        LoadingStates.LOADED -> {
+            // Affichage de la liste
+            cv.value?.let {
+                ResultScreen(it.data, modifier)
+            }
+        }
+        LoadingStates.ERROR -> {
+            // Affichage d'un message d'erreur
+            ErrorScreen()
+        }
     }
 }
 
@@ -137,7 +155,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
  * ResultScreen displaying number of photos retrieved.
  */
 @Composable
-fun ResultScreen(data: Data?, modifier: Modifier = Modifier) {
+fun ResultScreen(data: GetCvResponse.Data?, modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center, modifier = modifier
     ) {
@@ -203,7 +221,7 @@ fun ResultScreen(data: Data?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun DescriptionCard(data: Data) {
+fun DescriptionCard(data: GetCvResponse.Data) {
     Text(
         text = data.description,
         modifier = Modifier.padding(16.dp),
@@ -319,7 +337,7 @@ fun AutresCard(autres: List<Autre>) {
 }
 
 @Composable
-fun ContactCard(data: Data) {
+fun ContactCard(data: GetCvResponse.Data) {
     val context = LocalContext.current
     Row(
         Modifier

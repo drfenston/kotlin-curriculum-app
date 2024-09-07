@@ -36,25 +36,89 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.cyrilmaquaire.curriculum.R
-import com.cyrilmaquaire.curriculum.ui.screens.HomeScreen
-import com.cyrilmaquaire.curriculum.ui.screens.CvViewModel
+import com.cyrilmaquaire.curriculum.ui.screens.CvListScreen
+import com.cyrilmaquaire.curriculum.model.viewmodels.CvViewModel
+import com.cyrilmaquaire.curriculum.ui.screens.LoginScreen
+import com.cyrilmaquaire.curriculum.ui.screens.ProfileScreen
+import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvViewModel
+
+
+enum class Screen {
+    PROFILE, CVLIST, LOGIN,
+}
+
+sealed class NavigationItem(val route: String) {
+    data object Profile : NavigationItem(Screen.PROFILE.name)
+    data object CvList : NavigationItem(Screen.CVLIST.name)
+    data object Login : NavigationItem(Screen.LOGIN.name)
+}
+
+@Composable
+fun AppNavHost(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    startDestination: String = NavigationItem.Login.route,
+) {
+    val viewModel: CvViewModel = viewModel()
+    val getCvViewModel: GetCvViewModel = viewModel()
+    NavHost(
+        modifier = modifier, navController = navController, startDestination = startDestination
+    ) {
+        composable(route = NavigationItem.Login.route) {
+            LoginScreen(
+                navController
+            )
+        }
+        composable(route = NavigationItem.CvList.route) {
+            CvListScreen(
+                navController = navController,
+                cvUiState = viewModel.cvUiState,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+            )
+        }
+        composable(
+            route = NavigationItem.Profile.route + "/{userId}",
+            arguments = listOf(navArgument("userId") {
+                type = NavType.LongType; defaultValue = 1
+            })
+        ) { backstackEntry ->
+            ProfileScreen(
+                userId = backstackEntry.arguments?.getLong("userId"),
+                viewModel = getCvViewModel,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+            )
+        }
+    }
+}
 
 @Composable
 fun CvApp() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { CvTopAppBar(scrollBehavior = scrollBehavior) }
-    ) {
+
+    Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = { CvTopAppBar(scrollBehavior = scrollBehavior) }) {
         Surface(
-            modifier = Modifier.fillMaxSize().fillMaxSize().padding(it)
+            modifier = Modifier
+                .fillMaxSize()
+                .fillMaxSize()
+                .padding(it)
         ) {
-            val cvViewModel: CvViewModel = viewModel()
-            HomeScreen(
-                cvUiState = cvViewModel.cvUiState,
-                modifier = Modifier.padding(horizontal = 24.dp).verticalScroll(rememberScrollState()).fillMaxSize()
-            )
+            val viewModel: CvViewModel = viewModel()
+            viewModel.getAllCV()
+            AppNavHost(navController = rememberNavController())
         }
     }
 }

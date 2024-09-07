@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cyrilmaquaire.curriculum.ui.screens
+package com.cyrilmaquaire.curriculum.model.viewmodels
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cyrilmaquaire.curriculum.model.Data
+import com.cyrilmaquaire.curriculum.model.responses.Response
 import com.cyrilmaquaire.curriculum.network.CvApi
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -30,7 +30,7 @@ import java.io.IOException
  * UI state for the Home screen
  */
 sealed interface CvUiState {
-    data class Success(val cvData: Data?) : CvUiState
+    data class Success(val response: Response) : CvUiState
     data object Error : CvUiState
     data object Loading : CvUiState
 }
@@ -40,22 +40,12 @@ class CvViewModel : ViewModel() {
     var cvUiState: CvUiState by mutableStateOf(CvUiState.Loading)
         private set
 
-    /**
-     * Call getCV() on init so we can display status immediately.
-     */
-    init {
-        getCV()
-    }
-
-    /**
-     * Gets cv informations from the CV API Retrofit service and updates the
-     */
-    private fun getCV() {
+    fun getAllCV() {
         viewModelScope.launch {
             cvUiState = CvUiState.Loading
             cvUiState = try {
-                val cv = CvApi.retrofitService.getCV()
-                CvUiState.Success(cv.data)
+                val response = CvApi.retrofitService.getAllCV()
+                CvUiState.Success(response)
             } catch (e: IOException) {
                 CvUiState.Error
             } catch (e: HttpException) {
