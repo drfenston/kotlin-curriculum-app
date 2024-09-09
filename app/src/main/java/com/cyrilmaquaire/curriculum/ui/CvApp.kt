@@ -44,7 +44,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cyrilmaquaire.curriculum.R
 import com.cyrilmaquaire.curriculum.ui.screens.CvListScreen
-import com.cyrilmaquaire.curriculum.model.viewmodels.CvViewModel
+import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvListViewModel
 import com.cyrilmaquaire.curriculum.ui.screens.LoginScreen
 import com.cyrilmaquaire.curriculum.ui.screens.ProfileScreen
 import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvViewModel
@@ -66,8 +66,8 @@ fun AppNavHost(
     navController: NavHostController,
     startDestination: String = NavigationItem.Login.route,
 ) {
-    val viewModel: CvViewModel = viewModel()
     val getCvViewModel: GetCvViewModel = viewModel()
+    val getCvListViewModel: GetCvListViewModel = viewModel()
     NavHost(
         modifier = modifier, navController = navController, startDestination = startDestination
     ) {
@@ -79,11 +79,7 @@ fun AppNavHost(
         composable(route = NavigationItem.CvList.route) {
             CvListScreen(
                 navController = navController,
-                cvUiState = viewModel.cvUiState,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxSize()
+                viewModel= getCvListViewModel
             )
         }
         composable(
@@ -116,8 +112,6 @@ fun CvApp() {
                 .fillMaxSize()
                 .padding(it)
         ) {
-            val viewModel: CvViewModel = viewModel()
-            viewModel.getAllCV()
             AppNavHost(navController = rememberNavController())
         }
     }

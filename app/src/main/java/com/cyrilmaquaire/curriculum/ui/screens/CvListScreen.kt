@@ -27,11 +27,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,25 +45,44 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.cyrilmaquaire.curriculum.R
-import com.cyrilmaquaire.curriculum.model.responses.GetAllCvResponse
-import com.cyrilmaquaire.curriculum.model.viewmodels.CvUiState
+import com.cyrilmaquaire.curriculum.data.LoadingStates
+import com.cyrilmaquaire.curriculum.model.CV
+import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvListViewModel
 import com.cyrilmaquaire.curriculum.ui.NavigationItem
 import com.cyrilmaquaire.curriculum.ui.theme.FenstonBlue
 
 
 @Composable
 fun CvListScreen(
-    navController: NavController, modifier: Modifier = Modifier, cvUiState: CvUiState
+    navController: NavController, viewModel: GetCvListViewModel
 ) {
-    when (cvUiState) {
-        is CvUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-        is CvUiState.Success -> ListScreen(
-            navController = navController,
-            (cvUiState.response as GetAllCvResponse),
-            modifier = modifier.fillMaxWidth()
-        )
 
-        is CvUiState.Error -> ErrorScreen(modifier = modifier.fillMaxSize())
+    val loadingState = viewModel.loadingState.collectAsState()
+    val cvList = viewModel.response.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getCvList()
+    }
+
+    when (loadingState.value) {
+        LoadingStates.LOADING -> {
+            // Affichage d'un loader
+            LoadingScreen()
+        }
+
+        LoadingStates.LOADED -> {
+            // Affichage de la liste
+            cvList.value?.let {
+                ListScreen(
+                    navController, it.data
+                )
+            }
+        }
+
+        LoadingStates.ERROR -> {
+            // Affichage d'un message d'erreur
+            ErrorScreen()
+        }
     }
 }
 
@@ -68,58 +91,55 @@ fun CvListScreen(
  */
 @Composable
 fun ListScreen(
-    navController: NavController, data: GetAllCvResponse, modifier: Modifier = Modifier
+    navController: NavController, cvList: List<CV>
 ) {
-    Box(
-        modifier = modifier
-    ) {
-        Column {
-            for (cv in data.data) {
-                Card(modifier = Modifier.padding(8.dp)) {
-                    Row(
+    LazyColumn {
+        items(cvList) { cv ->
+            Card(modifier = Modifier.padding(8.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center)
+                        .padding(8.dp)
+                        .clickable(onClick = {
+                            navController.navigate(NavigationItem.Profile.route + "/" + cv.id)
+                        })
+                ) {
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentSize(Alignment.Center)
-                            .padding(8.dp)
-                            .clickable(onClick = {
-                                navController.navigate(NavigationItem.Profile.route + "/" + cv.id)
-                            })
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(FenstonBlue)
                     ) {
-                        Box(
+                        AsyncImage(
+                            model = "https://www.cyrilmaquaire.com/curriculum/uploads/" + cv.profileImage,
+                            contentDescription = "Translated description of what the image contains",
+                            contentScale = ContentScale.FillBounds,
                             modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
-                                .background(FenstonBlue)
-                        ) {
-                            AsyncImage(
-                                model = "https://www.cyrilmaquaire.com/curriculum/uploads/" + cv.profileImage,
-                                contentDescription = "Translated description of what the image contains",
-                                contentScale = ContentScale.FillBounds,
-                                modifier = Modifier
-                                    .height(100.dp)
-                                    .width(100.dp)
-                            )
-                        }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(all = 12.dp)
-                        ) {
-                            Text(
-                                text = cv.nom + " " + cv.prenom,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontFamily = fontOrbitronFamily
-                            )
-                            Text(text = cv.poste, style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                text = stringResource(R.string._15ans_d_experience),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-
-                        }
+                                .height(100.dp)
+                                .width(100.dp)
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(all = 12.dp)
+                    ) {
+                        Text(
+                            text = cv.nom + " " + cv.prenom,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontFamily = fontOrbitronFamily
+                        )
+                        Text(text = cv.poste, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = stringResource(R.string._15ans_d_experience),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
                 }
             }
         }
     }
+
 }
+

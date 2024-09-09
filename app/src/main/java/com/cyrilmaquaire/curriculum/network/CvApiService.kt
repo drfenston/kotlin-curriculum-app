@@ -17,7 +17,7 @@
 package com.cyrilmaquaire.curriculum.network
 
 import com.cyrilmaquaire.curriculum.model.requests.LoginRequest
-import com.cyrilmaquaire.curriculum.model.responses.GetAllCvResponse
+import com.cyrilmaquaire.curriculum.model.responses.GetCvListResponse
 import com.cyrilmaquaire.curriculum.model.responses.GetCvResponse
 import com.cyrilmaquaire.curriculum.model.responses.LoginResponse
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -45,7 +45,6 @@ fun getClient(): Retrofit {
     logging.setLevel(HttpLoggingInterceptor.Level.BODY)
     val httpClient: OkHttpClient.Builder = OkHttpClient.Builder()
 
-
     // add your other interceptors …
     // add logging as last interceptor
     httpClient.addInterceptor(logging)
@@ -54,7 +53,7 @@ fun getClient(): Retrofit {
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl(BASE_URL)
-        .client(httpClient.build())
+        //.client(httpClient.build())
         .build()
 }
 
@@ -63,7 +62,7 @@ fun getClient(): Retrofit {
  */
 interface CvApiService {
     @GET("CV")
-    suspend fun getAllCV(): GetAllCvResponse
+    suspend fun getAllCV(): GetCvListResponse
 
     @GET("CV/{id}")
     suspend fun getCV(@Path("id") id: Long?): GetCvResponse

@@ -66,11 +66,11 @@ import coil.compose.AsyncImage
 import com.cyrilmaquaire.curriculum.R
 import com.cyrilmaquaire.curriculum.data.LoadingStates
 import com.cyrilmaquaire.curriculum.model.Autre
+import com.cyrilmaquaire.curriculum.model.CV
 import com.cyrilmaquaire.curriculum.model.CompetenceTechnique
 import com.cyrilmaquaire.curriculum.model.Experience
 import com.cyrilmaquaire.curriculum.model.Formation
 import com.cyrilmaquaire.curriculum.model.Langue
-import com.cyrilmaquaire.curriculum.model.responses.GetCvResponse
 import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvViewModel
 import com.cyrilmaquaire.curriculum.provider
 import com.cyrilmaquaire.curriculum.ui.elements.LinkText
@@ -155,11 +155,11 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
  * ResultScreen displaying number of photos retrieved.
  */
 @Composable
-fun ResultScreen(data: GetCvResponse.Data?, modifier: Modifier = Modifier) {
+fun ResultScreen(cv: CV?, modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center, modifier = modifier
     ) {
-        data.let {
+        cv.let {
             Column {
                 it?.let { data ->
                     Column(
@@ -206,7 +206,7 @@ fun ResultScreen(data: GetCvResponse.Data?, modifier: Modifier = Modifier) {
                 }
 
                 it?.let { data ->
-                    ContactCard(data = data)
+                    ContactCard(cv = data)
                     CompetenceTechniqueCard(competencesTechniques = data.competenceTechniques)
                     LangueCard(data.langues)
                     AutresCard(autres = data.autres)
@@ -221,9 +221,9 @@ fun ResultScreen(data: GetCvResponse.Data?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun DescriptionCard(data: GetCvResponse.Data) {
+fun DescriptionCard(cv: CV) {
     Text(
-        text = data.description,
+        text = cv.description,
         modifier = Modifier.padding(16.dp),
         style = MaterialTheme.typography.headlineSmall,
         fontFamily = fontAntonioFamily
@@ -337,7 +337,7 @@ fun AutresCard(autres: List<Autre>) {
 }
 
 @Composable
-fun ContactCard(data: GetCvResponse.Data) {
+fun ContactCard(cv: CV) {
     val context = LocalContext.current
     Row(
         Modifier
@@ -357,7 +357,7 @@ fun ContactCard(data: GetCvResponse.Data) {
                     contentDescription = "Phone",
                     Modifier.padding(horizontal = 16.dp)
                 )
-                Text(text = data.telephone)
+                Text(text = cv.telephone)
             }
 
             Row {
@@ -366,7 +366,7 @@ fun ContactCard(data: GetCvResponse.Data) {
                     contentDescription = "Email",
                     Modifier.padding(horizontal = 16.dp)
                 )
-                Text(text = data.mail)
+                Text(text = cv.mail)
             }
             Row {
                 Icon(
@@ -377,9 +377,9 @@ fun ContactCard(data: GetCvResponse.Data) {
                 LinkText(
                     linkTextData = listOf(
                         LinkTextData(
-                            text = data.website,
+                            text = cv.website,
                             tag = "icon_1_author",
-                            annotation = "http://" + data.website,
+                            annotation = "http://" + cv.website,
                             onClick = {
                                 val i = Intent(Intent.ACTION_VIEW)
                                 i.setData(Uri.parse(it.item))
@@ -397,9 +397,9 @@ fun ContactCard(data: GetCvResponse.Data) {
                 )
                 Box {
                     Column {
-                        Text(text = data.adresse1)
-                        if (data.adresse2.isNotEmpty()) Text(text = data.adresse2)
-                        Text(text = data.zipCode + " " + data.city)
+                        Text(text = cv.adresse1)
+                        if (cv.adresse2.isNotEmpty()) Text(text = cv.adresse2)
+                        Text(text = cv.zipCode + " " + cv.city)
                     }
                 }
             }

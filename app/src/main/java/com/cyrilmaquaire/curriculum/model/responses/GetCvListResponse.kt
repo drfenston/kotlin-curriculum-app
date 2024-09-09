@@ -6,8 +6,8 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class GetCvResponse : Response() {
+class GetCvListResponse : Response() {
     @SerializedName("data")
     @Expose
-    var data: CV? = null
+    var data: List<CV> = listOf()
 }
