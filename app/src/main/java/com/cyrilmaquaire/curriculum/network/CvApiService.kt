@@ -16,20 +16,25 @@
 
 package com.cyrilmaquaire.curriculum.network
 
+import com.cyrilmaquaire.curriculum.model.CV
 import com.cyrilmaquaire.curriculum.model.requests.LoginRequest
 import com.cyrilmaquaire.curriculum.model.responses.GetCvListResponse
 import com.cyrilmaquaire.curriculum.model.responses.GetCvResponse
 import com.cyrilmaquaire.curriculum.model.responses.LoginResponse
+import com.cyrilmaquaire.curriculum.token
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 
@@ -53,9 +58,21 @@ fun getClient(): Retrofit {
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl(BASE_URL)
-        //.client(httpClient.build())
+        .client(okHttpClient().build())
         .build()
 }
+
+private fun okHttpClient() = OkHttpClient().newBuilder()
+    .addInterceptor(
+        Interceptor { chain ->
+            val request: Request = chain.request()
+                .newBuilder()
+                .header("accept", "application/json")
+                .header("Authorization", "Bearer $token")
+                .build()
+            chain.proceed(request)
+        }
+    )
 
 /**
  * Retrofit service object for creating api calls
@@ -66,6 +83,9 @@ interface CvApiService {
 
     @GET("CV/{id}")
     suspend fun getCV(@Path("id") id: Long?): GetCvResponse
+
+    @PUT("CV/{id}")
+    suspend fun updateCV(@Path("id") id: Long?, @Body cv: CV): GetCvResponse
 
     @POST("Login")
     suspend fun login(@Body loginResquest: LoginRequest): LoginResponse

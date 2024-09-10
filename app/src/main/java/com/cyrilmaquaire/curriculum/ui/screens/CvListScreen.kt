@@ -15,8 +15,9 @@
  */
 package com.cyrilmaquaire.curriculum.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +34,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -73,6 +75,7 @@ fun CvListScreen(
         LoadingStates.LOADED -> {
             // Affichage de la liste
             cvList.value?.let {
+                com.cyrilmaquaire.curriculum.cvList = it.data
                 ListScreen(
                     navController, it.data
                 )
@@ -101,9 +104,6 @@ fun ListScreen(
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center)
                         .padding(8.dp)
-                        .clickable(onClick = {
-                            navController.navigate(NavigationItem.Profile.route + "/" + cv.id)
-                        })
                 ) {
                     Box(
                         modifier = Modifier
@@ -137,9 +137,30 @@ fun ListScreen(
                         )
                     }
                 }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    TextButton(
+                        onClick = {
+                            Log.d("coucou", "click sur Consulter")
+                            navController.navigate(NavigationItem.Profile.route + "/" + cv.id)
+                        }
+                    ) {
+                        Text("Consulter")
+                    }
+
+                    TextButton(
+                        onClick = {
+                            Log.d("coucou", "click sur Modifier")
+                            navController.navigate(NavigationItem.Edit.route+"/"+cv.id)
+                        }
+                    ) {
+                        Text("Modifier")
+                    }
+                }
             }
         }
     }
-
 }
 

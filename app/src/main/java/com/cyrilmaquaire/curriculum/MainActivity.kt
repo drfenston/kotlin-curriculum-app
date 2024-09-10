@@ -10,10 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.tooling.preview.Preview
+import com.cyrilmaquaire.curriculum.model.CV
 import com.cyrilmaquaire.curriculum.ui.CvApp
 import com.cyrilmaquaire.curriculum.ui.theme.CurriculumTheme
-
+var cvList: List<CV> = listOf()
+var token:String? = null
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

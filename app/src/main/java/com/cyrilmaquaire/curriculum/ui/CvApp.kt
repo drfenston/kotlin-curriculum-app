@@ -48,16 +48,19 @@ import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvListViewModel
 import com.cyrilmaquaire.curriculum.ui.screens.LoginScreen
 import com.cyrilmaquaire.curriculum.ui.screens.ProfileScreen
 import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvViewModel
+import com.cyrilmaquaire.curriculum.model.viewmodels.UpdateCvViewModel
+import com.cyrilmaquaire.curriculum.ui.screens.EditCvScreen
 
 
 enum class Screen {
-    PROFILE, CVLIST, LOGIN,
+    PROFILE, CVLIST, LOGIN, EDIT
 }
 
 sealed class NavigationItem(val route: String) {
     data object Profile : NavigationItem(Screen.PROFILE.name)
     data object CvList : NavigationItem(Screen.CVLIST.name)
     data object Login : NavigationItem(Screen.LOGIN.name)
+    data object Edit : NavigationItem(Screen.EDIT.name)
 }
 
 @Composable
@@ -68,6 +71,7 @@ fun AppNavHost(
 ) {
     val getCvViewModel: GetCvViewModel = viewModel()
     val getCvListViewModel: GetCvListViewModel = viewModel()
+    val updateCvViewModel: UpdateCvViewModel = viewModel()
     NavHost(
         modifier = modifier, navController = navController, startDestination = startDestination
     ) {
@@ -91,6 +95,20 @@ fun AppNavHost(
             ProfileScreen(
                 userId = backstackEntry.arguments?.getLong("userId"),
                 viewModel = getCvViewModel,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+            )
+        }
+        composable(route = NavigationItem.Edit.route+"/{cvId}",
+            arguments = listOf(navArgument("cvId") {
+                type = NavType.LongType; defaultValue = 1
+            })) {
+                backstackEntry ->
+            EditCvScreen(
+                cvId = backstackEntry.arguments?.getLong("cvId"),
+                viewModel= updateCvViewModel,
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .verticalScroll(rememberScrollState())

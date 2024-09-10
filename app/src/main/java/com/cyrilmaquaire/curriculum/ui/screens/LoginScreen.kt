@@ -34,6 +34,7 @@ import com.cyrilmaquaire.curriculum.R
 import com.cyrilmaquaire.curriculum.data.LoadingStates
 import com.cyrilmaquaire.curriculum.model.requests.LoginRequest
 import com.cyrilmaquaire.curriculum.model.viewmodels.LoginViewModel
+import com.cyrilmaquaire.curriculum.token
 import com.cyrilmaquaire.curriculum.ui.NavigationItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -94,6 +95,7 @@ fun LoginForm(navController: NavController) {
             } else {
                 viewModel.login(loginRequest) { response ->
                     Log.d("coucou", "token " + response.token)
+                    token = response.token
                     CoroutineScope(Dispatchers.Main).launch {
                         navController.navigate(NavigationItem.CvList.route)
                     }

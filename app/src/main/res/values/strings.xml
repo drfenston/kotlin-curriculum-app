@@ -17,4 +17,15 @@
     <string name="se_connecter">Se Connecter</string>
     <string name="chargement">Chargement...</string>
     <string name="veuillez_remplir_tous_les_champs">Veuillez remplir tous les champs</string>
+    <string name="poste">Poste</string>
+    <string name="description">Description</string>
+    <string name="nom">Nom</string>
+    <string name="prenom">Prénom</string>
+    <string name="adresse_1">Adresse 1</string>
+    <string name="adresse_2">Adresse 2</string>
+    <string name="code_postal">Code Postal</string>
+    <string name="ville">Ville</string>
+    <string name="telephone">Téléphone</string>
+    <string name="email">Email</string>
+    <string name="site_web">Site Web</string>
 </resources>
