@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Langue (
     val id: Long,
-    var origine: String,
-    var niveau: String,
-    var percent: Long,
+    var origine: String = "",
+    var niveau: String = "",
+    var percent: Long = 0,
     val created: String,
 
     @SerialName("CVId")

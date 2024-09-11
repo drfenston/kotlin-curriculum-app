@@ -18,6 +18,12 @@ package com.cyrilmaquaire.curriculum.network
 
 import com.cyrilmaquaire.curriculum.model.CV
 import com.cyrilmaquaire.curriculum.model.requests.LoginRequest
+import com.cyrilmaquaire.curriculum.model.responses.AutreResponse
+import com.cyrilmaquaire.curriculum.model.responses.CompTechResponse
+import com.cyrilmaquaire.curriculum.model.responses.ExperienceResponse
+import com.cyrilmaquaire.curriculum.model.responses.FormationResponse
+import com.cyrilmaquaire.curriculum.model.responses.LangueResponse
+import com.cyrilmaquaire.curriculum.model.responses.ProjetResponse
 import com.cyrilmaquaire.curriculum.model.responses.GetCvListResponse
 import com.cyrilmaquaire.curriculum.model.responses.GetCvResponse
 import com.cyrilmaquaire.curriculum.model.responses.LoginResponse
@@ -32,6 +38,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -89,6 +96,43 @@ interface CvApiService {
 
     @POST("Login")
     suspend fun login(@Body loginResquest: LoginRequest): LoginResponse
+
+    @POST("langue/{cvId}")
+    suspend fun createLangue(@Path("cvId") cvId: Long?): LangueResponse
+
+    @POST("competenceTechnique/{cvId}")
+    suspend fun createCompetenceTechnique(@Path("cvId") cvId: Long?): CompTechResponse
+
+    @POST("autre/{cvId}")
+    suspend fun createAutre(@Path("cvId") cvId: Long?): AutreResponse
+
+    @POST("experience/{cvId}")
+    suspend fun createExperience(@Path("cvId") cvId: Long?): ExperienceResponse
+
+    @POST("formation/{cvId}")
+    suspend fun createFormation(@Path("cvId") cvId: Long?): FormationResponse
+
+    @POST("projet/{projetId}")
+    suspend fun createProjet(@Path("projetId") cvId: Long?): ProjetResponse
+
+    @DELETE("langue/{cvId}")
+    suspend fun deleteLangue(@Path("cvId") cvId: Long?): LangueResponse
+
+    @DELETE("competenceTechnique/{cvId}")
+    suspend fun deleteCompetenceTechnique(@Path("cvId") cvId: Long?): CompTechResponse
+
+    @DELETE("autre/{cvId}")
+    suspend fun deleteAutre(@Path("cvId") cvId: Long?): AutreResponse
+
+    @DELETE("experience/{cvId}")
+    suspend fun deleteExperience(@Path("cvId") cvId: Long?): ExperienceResponse
+
+    @DELETE("formation/{cvId}")
+    suspend fun deleteFormation(@Path("cvId") cvId: Long?): FormationResponse
+
+    @DELETE("projet/{projetId}")
+    suspend fun deleteProjet(@Path("projetId") cvId: Long?): ProjetResponse
+
 }
 
 /**

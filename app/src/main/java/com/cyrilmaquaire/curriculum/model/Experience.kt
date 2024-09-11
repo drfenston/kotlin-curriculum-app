@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Experience (
     val id: Long,
-    var dateDebut: String,
-    var dateFin: String,
-    var entreprise: String,
-    var poste: String,
+    var dateDebut: String = "",
+    var dateFin: String = "",
+    var entreprise: String = "",
+    var poste: String = "",
     val created: String,
 
     @SerialName("CVId")

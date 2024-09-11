@@ -20,9 +20,9 @@ data class CV (
     var website: String,
     var reseaux: String,
     var created: String,
-    var formations: List<Formation>,
-    var langues: List<Langue>,
-    var autres: List<Autre>,
-    var competenceTechniques: List<CompetenceTechnique>,
-    var experiences: List<Experience>
+    var formations: MutableList<Formation>,
+    var langues: MutableList<Langue>,
+    var autres: MutableList<Autre>,
+    var competenceTechniques: MutableList<CompetenceTechnique>,
+    var experiences: MutableList<Experience>
 )
