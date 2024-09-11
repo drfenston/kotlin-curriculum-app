@@ -108,11 +108,7 @@ fun AppNavHost(
                 backstackEntry ->
             EditCvScreen(
                 cvId = backstackEntry.arguments?.getLong("cvId"),
-                viewModel= updateCvViewModel,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxSize()
+                viewModel= updateCvViewModel
             )
         }
     }
@@ -126,7 +122,6 @@ fun CvApp() {
         topBar = { CvTopAppBar(scrollBehavior = scrollBehavior) }) {
         Surface(
             modifier = Modifier
-                .fillMaxSize()
                 .fillMaxSize()
                 .padding(it)
         ) {

@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CompetenceTechnique (
     val id: Long,
-    val icon: String,
-    val libelle: String,
-    val competence: String,
-    val percent: Long,
+    var icon: String,
+    var libelle: String,
+    var competence: String,
+    var percent: Long,
     val created: String,
 
     @SerialName("CVId")

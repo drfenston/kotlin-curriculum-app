@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.cyrilmaquaire.curriculum"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -83,5 +83,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.ui.text.google.fonts)
     implementation(libs.logging.interceptor)
+    implementation(libs.androidx.material.icons.extended.android)
 
 }

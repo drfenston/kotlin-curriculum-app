@@ -98,7 +98,7 @@ fun ListScreen(
 ) {
     LazyColumn {
         items(cvList) { cv ->
-            Card(modifier = Modifier.padding(8.dp)) {
+            Card(modifier = Modifier.padding(16.dp)) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

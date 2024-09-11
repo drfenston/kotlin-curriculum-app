@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Autre (
     val id: Long,
-    val libelle: String,
-    val description: String,
+    var libelle: String,
+    var description: String,
     val created: String,
 
     @SerialName("CVId")
