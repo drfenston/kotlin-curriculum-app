@@ -24,5 +24,6 @@ data class CV (
     var langues: MutableList<Langue>,
     var autres: MutableList<Autre>,
     var competenceTechniques: MutableList<CompetenceTechnique>,
-    var experiences: MutableList<Experience>
+    var experiences: MutableList<Experience>,
+    var userId:Long
 )

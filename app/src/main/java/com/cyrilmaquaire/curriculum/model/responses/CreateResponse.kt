@@ -3,9 +3,8 @@ package com.cyrilmaquaire.curriculum.model.responses
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LoginResponse(
+data class CreateResponse(
     val data: User,
-    val token: String,
 ) : Response() {
 
     @Serializable

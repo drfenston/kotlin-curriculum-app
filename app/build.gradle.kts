@@ -82,7 +82,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.coil.compose)
     implementation(libs.ui.text.google.fonts)
-    implementation(libs.logging.interceptor)
+    implementation (libs.logging.interceptor.v492)
     implementation(libs.androidx.material.icons.extended.android)
 
 }

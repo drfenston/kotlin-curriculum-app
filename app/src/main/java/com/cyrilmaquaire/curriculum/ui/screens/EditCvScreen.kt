@@ -258,26 +258,33 @@ fun EditProfileScreen(
             },
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedTextField(value = nom,
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.nom)) },
-            onValueChange = {
-                nom = it
-                cv.nom = it
-                hasSomethingChanged.value = true
-            })
-        OutlinedTextField(value = prenom,
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.prenom)) },
-            onValueChange = {
-                prenom = it
-                cv.prenom = it
-                hasSomethingChanged.value = true
-            })
+        Row(modifier = Modifier.padding(top = 24.dp)) {
+            OutlinedTextField(
+                value = nom,
+                maxLines = 1,
+                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                modifier = Modifier.weight(.5f),
+                label = { Text(stringResource(R.string.nom)) },
+                onValueChange = {
+                    nom = it
+                    cv.nom = it
+                    hasSomethingChanged.value = true
+                })
+            OutlinedTextField(
+                value = prenom,
+                maxLines = 1,
+                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                modifier = Modifier.weight(.5f),
+                label = { Text(stringResource(R.string.prenom)) },
+                onValueChange = {
+                    prenom = it
+                    cv.prenom = it
+                    hasSomethingChanged.value = true
+                })
+        }
+
         OutlinedTextField(
             value = adresse1,
             maxLines = 1,
@@ -289,7 +296,9 @@ fun EditProfileScreen(
                 cv.adresse1 = it
                 hasSomethingChanged.value = true
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
         )
         OutlinedTextField(
             value = adresse2,
@@ -304,26 +313,31 @@ fun EditProfileScreen(
             },
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedTextField(value = zipCode,
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.code_postal)) },
-            onValueChange = {
-                zipCode = it
-                cv.zipCode = it
-                hasSomethingChanged.value = true
-            })
-        OutlinedTextField(value = ville,
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.ville)) },
-            onValueChange = {
-                ville = it
-                cv.city = it
-                hasSomethingChanged.value = true
-            })
+        Row {
+            OutlinedTextField(value = zipCode,
+                maxLines = 1,
+                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                label = { Text(stringResource(R.string.code_postal)) },
+                modifier = Modifier.weight(.4f),
+                onValueChange = {
+                    zipCode = it
+                    cv.zipCode = it
+                    hasSomethingChanged.value = true
+                })
+            OutlinedTextField(value = ville,
+                maxLines = 1,
+                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                modifier = Modifier.weight(1f),
+                label = { Text(stringResource(R.string.ville)) },
+                onValueChange = {
+                    ville = it
+                    cv.city = it
+                    hasSomethingChanged.value = true
+                })
+        }
+
         OutlinedTextField(
             value = telephone,
             maxLines = 1,
@@ -335,7 +349,9 @@ fun EditProfileScreen(
                 cv.telephone = it
                 hasSomethingChanged.value = true
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
         )
         OutlinedTextField(
             value = email,
@@ -418,23 +434,25 @@ fun ComptTechScreen(cv: CV, viewModel: UpdateCvViewModel) {
                             },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        OutlinedTextField(
-                            value = competence,
-                            maxLines = 1,
-                            keyboardActions = KeyboardActions(onNext = {
-                                focusManager.moveFocus(
-                                    FocusDirection.Down
-                                )
-                            }),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            label = { Text("Description de la compétence") },
-                            onValueChange = {
-                                competence = it
-                                compTech.competence = it
-                                hasSomethingChanged.value = true
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        competence?.let {
+                            OutlinedTextField(
+                                value = it,
+                                maxLines = 1,
+                                keyboardActions = KeyboardActions(onNext = {
+                                    focusManager.moveFocus(
+                                        FocusDirection.Down
+                                    )
+                                }),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                label = { Text("Description de la compétence") },
+                                onValueChange = { comp ->
+                                    competence = comp
+                                    compTech.competence = comp
+                                    hasSomethingChanged.value = true
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                         Slider(value = sliderPosition,
                             steps = 5,
                             valueRange = 0f..100f,
@@ -899,7 +917,7 @@ fun FormationScreen(cv: CV, viewModel: UpdateCvViewModel) {
                         )
                         OutlinedTextField(
                             value = description,
-                            maxLines = 1,
+                            maxLines = 3,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
                                     FocusDirection.Down

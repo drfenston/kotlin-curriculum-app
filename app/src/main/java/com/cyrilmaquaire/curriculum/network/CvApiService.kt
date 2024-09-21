@@ -20,6 +20,7 @@ import com.cyrilmaquaire.curriculum.model.CV
 import com.cyrilmaquaire.curriculum.model.requests.LoginRequest
 import com.cyrilmaquaire.curriculum.model.responses.AutreResponse
 import com.cyrilmaquaire.curriculum.model.responses.CompTechResponse
+import com.cyrilmaquaire.curriculum.model.responses.CreateResponse
 import com.cyrilmaquaire.curriculum.model.responses.ExperienceResponse
 import com.cyrilmaquaire.curriculum.model.responses.FormationResponse
 import com.cyrilmaquaire.curriculum.model.responses.LangueResponse
@@ -48,19 +49,7 @@ import retrofit2.http.Path
 private const val BASE_URL =
     "https://cyrilmaquaire.com/curriculum/api/"
 
-
 fun getClient(): Retrofit {
-
-    val logging = HttpLoggingInterceptor()
-
-    // set your desired log level
-    logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-    val httpClient: OkHttpClient.Builder = OkHttpClient.Builder()
-
-    // add your other interceptors …
-    // add logging as last interceptor
-    httpClient.addInterceptor(logging)
-
     return Retrofit.Builder()
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .addConverterFactory(GsonConverterFactory.create())
@@ -79,14 +68,15 @@ private fun okHttpClient() = OkHttpClient().newBuilder()
                 .build()
             chain.proceed(request)
         }
-    )
+    ).addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+
 
 /**
  * Retrofit service object for creating api calls
  */
 interface CvApiService {
-    @GET("CV")
-    suspend fun getAllCV(): GetCvListResponse
+    @GET("findAllCV/{userId}")
+    suspend fun getAllCV(@Path("userId") userId: Long?): GetCvListResponse
 
     @GET("CV/{id}")
     suspend fun getCV(@Path("id") id: Long?): GetCvResponse
@@ -96,6 +86,9 @@ interface CvApiService {
 
     @POST("Login")
     suspend fun login(@Body loginResquest: LoginRequest): LoginResponse
+
+    @POST("User")
+    suspend fun createUser(@Body loginResquest: LoginRequest): CreateResponse
 
     @POST("langue/{cvId}")
     suspend fun createLangue(@Path("cvId") cvId: Long?): LangueResponse
@@ -132,7 +125,6 @@ interface CvApiService {
 
     @DELETE("projet/{projetId}")
     suspend fun deleteProjet(@Path("projetId") cvId: Long?): ProjetResponse
-
 }
 
 /**

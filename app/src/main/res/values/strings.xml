@@ -17,6 +17,7 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="se_connecter">Se Connecter</string>
+    <string name="creer_compte">Créer un compte</string>
     <string name="chargement">Chargement...</string>
     <string name="veuillez_remplir_tous_les_champs">Veuillez remplir tous les champs</string>
     <string name="poste">Poste</string>

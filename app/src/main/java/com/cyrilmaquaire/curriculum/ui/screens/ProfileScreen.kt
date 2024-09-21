@@ -286,10 +286,12 @@ fun CompetenceTechniqueCard(competencesTechniques: List<CompetenceTechnique>) {
                         text = competenceTechnique.libelle,
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text(
-                        text = competenceTechnique.competence,
-                        textAlign = TextAlign.Center, style = MaterialTheme.typography.bodySmall,
-                    )
+                    competenceTechnique.competence?.let {
+                        Text(
+                            text = it,
+                            textAlign = TextAlign.Center, style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
                 }
             }
         }

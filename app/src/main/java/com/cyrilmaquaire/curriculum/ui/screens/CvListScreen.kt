@@ -15,7 +15,6 @@
  */
 package com.cyrilmaquaire.curriculum.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +51,7 @@ import com.cyrilmaquaire.curriculum.model.CV
 import com.cyrilmaquaire.curriculum.model.viewmodels.GetCvListViewModel
 import com.cyrilmaquaire.curriculum.ui.NavigationItem
 import com.cyrilmaquaire.curriculum.ui.theme.FenstonBlue
+import com.cyrilmaquaire.curriculum.user
 
 
 @Composable
@@ -63,7 +63,7 @@ fun CvListScreen(
     val cvList = viewModel.response.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getCvList()
+        viewModel.getCvList(user?.id)
     }
 
     when (loadingState.value) {
@@ -143,7 +143,6 @@ fun ListScreen(
                 ) {
                     TextButton(
                         onClick = {
-                            Log.d("coucou", "click sur Consulter")
                             navController.navigate(NavigationItem.Profile.route + "/" + cv.id)
                         }
                     ) {
@@ -152,7 +151,6 @@ fun ListScreen(
 
                     TextButton(
                         onClick = {
-                            Log.d("coucou", "click sur Modifier")
                             navController.navigate(NavigationItem.Edit.route+"/"+cv.id)
                         }
                     ) {

@@ -1,5 +1,6 @@
 package com.cyrilmaquaire.curriculum.model.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.cyrilmaquaire.curriculum.data.LoadingStates
 import com.cyrilmaquaire.curriculum.model.responses.GetCvListResponse
@@ -13,11 +14,11 @@ class GetCvListViewModel : ViewModel() {
     var response = MutableStateFlow<GetCvListResponse?>(null)
     val loadingState = MutableStateFlow(LoadingStates.LOADING)
 
-    fun getCvList() {
+    fun getCvList(userId: Long?) {
         loadingState.value = LoadingStates.LOADING
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                response.value = CvApi.retrofitService.getAllCV()
+                response.value = CvApi.retrofitService.getAllCV(userId)
                 loadingState.value = LoadingStates.LOADED
             } catch (e: Throwable) {
                 loadingState.value = LoadingStates.ERROR
