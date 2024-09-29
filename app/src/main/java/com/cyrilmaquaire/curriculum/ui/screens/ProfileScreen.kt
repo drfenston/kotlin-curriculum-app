@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2023 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.cyrilmaquaire.curriculum.ui.screens
 
 import android.content.Intent
@@ -79,6 +64,10 @@ import com.cyrilmaquaire.curriculum.ui.theme.CurriculumTheme
 import com.cyrilmaquaire.curriculum.ui.theme.DateText
 import com.cyrilmaquaire.curriculum.ui.theme.ExtendedText
 import com.cyrilmaquaire.curriculum.ui.theme.FenstonBlue
+import java.time.LocalDate
+import java.time.Period
+import java.time.ZonedDateTime
+import java.time.format.DateTimeParseException
 
 
 val fontOrbitron = GoogleFont("Orbitron")
@@ -90,6 +79,11 @@ val fontOrbitronFamily = FontFamily(
 
 val fontAntonioFamily = FontFamily(
     Font(googleFont = fontAntonio, fontProvider = provider)
+)
+
+val moisAbreges = arrayOf(
+    "Jan", "Fév", "Mar", "Avr", "Mai", "Juin",
+    "Juil", "Août", "Sept", "Octt", "Nov", "Déc"
 )
 
 @Composable
@@ -109,12 +103,14 @@ fun ProfileScreen(
             // Affichage d'un loader
             LoadingScreen()
         }
+
         LoadingStates.LOADED -> {
             // Affichage de la liste
             cv.value?.let {
                 ResultScreen(it.data, modifier)
             }
         }
+
         LoadingStates.ERROR -> {
             // Affichage d'un message d'erreur
             ErrorScreen()
@@ -176,7 +172,7 @@ fun ResultScreen(cv: CV?, modifier: Modifier = Modifier) {
                             AsyncImage(
                                 model = "https://www.cyrilmaquaire.com/curriculum/uploads/" + data.profileImage,
                                 contentDescription = "Translated description of what the image contains",
-                                contentScale = ContentScale.FillBounds,
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .height(300.dp)
                                     .width(300.dp)
@@ -199,7 +195,7 @@ fun ResultScreen(cv: CV?, modifier: Modifier = Modifier) {
                         )
                         Text(text = data.poste, style = MaterialTheme.typography.headlineSmall)
                         Text(
-                            text = stringResource(R.string._15ans_d_experience),
+                            text = getExperienceText(cv?.debut) ?: "",
                             style = MaterialTheme.typography.headlineSmall
                         )
                     }
@@ -223,7 +219,7 @@ fun ResultScreen(cv: CV?, modifier: Modifier = Modifier) {
 @Composable
 fun DescriptionCard(cv: CV) {
     Text(
-        text = cv.description,
+        text = cv.description ?: "",
         modifier = Modifier.padding(16.dp),
         style = MaterialTheme.typography.headlineSmall,
         fontFamily = fontAntonioFamily
@@ -237,7 +233,7 @@ fun LangueCard(langues: List<Langue>) {
         for (langue in langues) {
             Row(Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = langue.origine,
+                    text = langue.origine ?: "",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(end = 16.dp)
                 )
@@ -283,13 +279,14 @@ fun CompetenceTechniqueCard(competencesTechniques: List<CompetenceTechnique>) {
                         )
                     }
                     Text(
-                        text = competenceTechnique.libelle,
+                        text = competenceTechnique.libelle ?: "",
                         style = MaterialTheme.typography.titleMedium
                     )
                     competenceTechnique.competence?.let {
                         Text(
                             text = it,
-                            textAlign = TextAlign.Center, style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                 }
@@ -328,7 +325,7 @@ fun AutresCard(autres: List<Autre>) {
                         )
                     }
                     Text(
-                        text = autre.libelle,
+                        text = autre.libelle ?: "",
                         modifier = Modifier.padding(bottom = 12.dp),
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -359,7 +356,7 @@ fun ContactCard(cv: CV) {
                     contentDescription = "Phone",
                     Modifier.padding(horizontal = 16.dp)
                 )
-                Text(text = cv.telephone)
+                Text(text = cv.telephone ?: "")
             }
 
             Row {
@@ -368,7 +365,7 @@ fun ContactCard(cv: CV) {
                     contentDescription = "Email",
                     Modifier.padding(horizontal = 16.dp)
                 )
-                Text(text = cv.mail)
+                Text(text = cv.mail ?: "")
             }
             Row {
                 Icon(
@@ -379,7 +376,7 @@ fun ContactCard(cv: CV) {
                 LinkText(
                     linkTextData = listOf(
                         LinkTextData(
-                            text = cv.website,
+                            text = cv.website ?: "",
                             tag = "icon_1_author",
                             annotation = "http://" + cv.website,
                             onClick = {
@@ -399,8 +396,8 @@ fun ContactCard(cv: CV) {
                 )
                 Box {
                     Column {
-                        Text(text = cv.adresse1)
-                        if (cv.adresse2.isNotEmpty()) Text(text = cv.adresse2)
+                        Text(text = cv.adresse1 ?: "")
+                        if (cv.adresse2?.isNotEmpty() == true) Text(text = cv.adresse2 ?: "")
                         Text(text = cv.zipCode + " " + cv.city)
                     }
                 }
@@ -413,11 +410,17 @@ fun ContactCard(cv: CV) {
 fun ExperienceCard(experiences: List<Experience>) {
     Column {
         ExtendedText(text = stringResource(R.string.experience))
-        for (experience in experiences) {
-            DateText(text = experience.dateDebut + " - " + experience.dateFin)
-            Text(text = experience.entreprise, style = MaterialTheme.typography.titleLarge)
+        for (experience in experiences.sortedByDescending { parseDate(it.dateDebut ?: "")?.year }) {
+            val dateDebut = parseDate(experience.dateDebut ?: "")
+            val dateFin = parseDate(experience.dateFin ?: "")
+            DateText(
+                text = moisAbreges[(dateDebut?.monthValue
+                    ?: 1) - 1] + " " + dateDebut?.year + " - " + moisAbreges[(dateFin?.monthValue
+                    ?: 1) - 1] + " " + dateFin?.year
+            )
+            Text(text = experience.entreprise ?: "", style = MaterialTheme.typography.titleLarge)
             Text(
-                text = experience.poste,
+                text = experience.poste ?: "",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -437,7 +440,8 @@ fun ExperienceCard(experiences: List<Experience>) {
                         }
 
                         Text(
-                            text = projet.description, modifier = Modifier.padding(bottom = 16.dp)
+                            text = projet.description ?: "",
+                            modifier = Modifier.padding(bottom = 16.dp)
                         )
                     }
                 }
@@ -451,19 +455,25 @@ fun ExperienceCard(experiences: List<Experience>) {
 fun FormationCard(formations: List<Formation>) {
     Column {
         ExtendedText(text = stringResource(R.string.education))
-        for (formation in formations) {
-            DateText(text = formation.dateDebut)
+        for (formation in formations.sortedByDescending { parseDate(it.dateDebut ?: "")?.year }) {
+            val dateDebut = parseDate(formation.dateDebut ?: "")
+            val dateFin = parseDate(formation.dateFin ?: "")
+            DateText(
+                text = moisAbreges[(dateDebut?.monthValue
+                    ?: 1) - 1] + " " + dateDebut?.year + " - " + moisAbreges[(dateFin?.monthValue
+                    ?: 1) - 1] + " " + dateFin?.year
+            )
             Column(
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .padding(bottom = 16.dp)
             ) {
                 Text(
-                    text = formation.etablissement,
+                    text = formation.etablissement ?: "",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = formation.description,
+                    text = formation.description ?: "",
                 )
             }
         }
@@ -483,5 +493,44 @@ fun LoadingScreenPreview() {
 fun ErrorScreenPreview() {
     CurriculumTheme {
         ErrorScreen()
+    }
+}
+
+fun parseDate(dateString: String): ZonedDateTime? {
+    return try {
+        ZonedDateTime.parse(dateString)
+    } catch (e: DateTimeParseException) {
+        println("Erreur de parsing: ${e.message}")
+        null // Retourne null en cas d'erreur
+    }
+}
+
+fun getExperienceText(debut: String?): String? {
+    if (debut.isNullOrEmpty()) {
+        return null // Si la date est vide ou nulle, on ne renvoie rien
+    }
+
+    // Convertir la chaîne en LocalDate
+    val startDate = try {
+        ZonedDateTime.parse(debut)
+    } catch (e: DateTimeParseException) {
+        return null // Si le format de la date n'est pas valide, renvoyer null
+    }
+
+    val currentDate = LocalDate.now()
+
+    // Calculer la différence en années et en mois
+    val period = Period.between(startDate.toLocalDate(), currentDate)
+    val years = period.years
+    val months = period.months
+    val totalMonths = years * 12 + months
+
+    return when {
+        totalMonths < 0 -> null // Date future non valide
+        totalMonths < 12 -> "$totalMonths mois d'expérience" // Moins d'un an
+        else -> {
+            val yearLabel = if (years == 1) "an" else "ans"
+            "$years $yearLabel d'expérience" // 1 an ou plus
+        }
     }
 }

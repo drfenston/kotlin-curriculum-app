@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Projet (
     val id: Long,
-    var nom: String,
-    var description: String,
+    var nom: String?,
+    var description: String?,
     val created: String,
 
     @SerialName("experienceId")

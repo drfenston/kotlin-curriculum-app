@@ -4,10 +4,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Autre (
+data class Autre(
     val id: Long,
-    var libelle: String= "",
-    var description: String = "",
+    var libelle: String? = "",
+    var description: String? = "",
     val created: String,
 
     @SerialName("CVId")

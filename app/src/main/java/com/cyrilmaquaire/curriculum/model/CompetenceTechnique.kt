@@ -4,12 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CompetenceTechnique (
+data class CompetenceTechnique(
     val id: Long,
     var icon: String? = "",
-    var libelle: String = "",
+    var libelle: String? = "",
     var competence: String? = "",
-    var percent: Long = 0,
+    var percent: Long? = 0,
     val created: String,
 
     @SerialName("CVId")

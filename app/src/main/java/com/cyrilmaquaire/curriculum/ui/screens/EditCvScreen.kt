@@ -2,13 +2,17 @@ package com.cyrilmaquaire.curriculum.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -66,20 +70,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.cyrilmaquaire.curriculum.R
 import com.cyrilmaquaire.curriculum.cvList
 import com.cyrilmaquaire.curriculum.data.LoadingStates
 import com.cyrilmaquaire.curriculum.model.CV
 import com.cyrilmaquaire.curriculum.model.Projet
 import com.cyrilmaquaire.curriculum.model.viewmodels.UpdateCvViewModel
+import com.cyrilmaquaire.curriculum.network.CvApi
 import com.cyrilmaquaire.curriculum.ui.theme.ExtendedText
+import com.cyrilmaquaire.curriculum.ui.theme.FenstonBlue
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -143,10 +152,9 @@ fun EditCvScreen(
                 LargeFloatingActionButton(
                     modifier = Modifier.size(64.dp),
                     onClick = {
-                        viewModel.updateCv(cvId = it.id, cv = it, onLoginSuccess = { response ->
-                            Log.d("coucou", "UpdateCV:  " + response.message)
+                        viewModel.updateCv(cvId = it.id, cv = it, onUpdateSuccess = {
                             hasSomethingChanged.value = false
-                        }, onLoginError = { error -> Log.d("coucou", "Error: $error") })
+                        }, onUpdateError = { error -> Log.d("coucou", "Error: $error") })
 
                         if (loadingState.value == LoadingStates.LOADING) {
                             Log.d("coucou", "Update CV Loading")
@@ -195,7 +203,7 @@ fun EditCvScreen(
                     .padding(horizontal = 24.dp)
             ) { index ->
                 when (index) {
-                    0 -> cv?.let { EditProfileScreen(it) }
+                    0 -> cv?.let { EditProfileScreen(it, viewModel) }
                     1 -> cv?.let { ComptTechScreen(it, viewModel) }
                     2 -> cv?.let { LanguesScreen(it, viewModel) }
                     3 -> cv?.let { ActiviteScreen(it, viewModel) }
@@ -210,11 +218,13 @@ fun EditCvScreen(
 
 @Composable
 fun EditProfileScreen(
-    cv: CV
+    cv: CV,
+    viewModel: UpdateCvViewModel
 ) {
     val focusManager = LocalFocusManager.current
 
     var poste by remember { mutableStateOf(cv.poste) }
+    var profileImage: String by remember { mutableStateOf(cv.profileImage ?: "") }
     var description by remember { mutableStateOf(cv.description) }
     var nom by remember { mutableStateOf(cv.nom) }
     var prenom by remember { mutableStateOf(cv.prenom) }
@@ -232,6 +242,33 @@ fun EditProfileScreen(
             .verticalScroll(rememberScrollState())
     ) {
         ExtendedText(text = stringResource(R.string.profile))
+
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .clip(CircleShape)
+                .background(FenstonBlue)
+        ) {
+            AsyncImage(
+                model = "https://www.cyrilmaquaire.com/curriculum/uploads/$profileImage",
+                contentDescription = "Profile picture of the resume.",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .height(300.dp)
+                    .width(300.dp)
+            )
+        }
+
+        CapturePhotoScreen(apiService = CvApi.retrofitService) { data ->
+            data.filename?.let {
+                profileImage = it
+                cv.profileImage = it
+                viewModel.updateCv(cvId = cv.id, cv = cv, onUpdateSuccess = {
+                    hasSomethingChanged.value = false
+                }, onUpdateError = { error -> Log.d("coucou", "Error: $error") })
+            }
+        }
+
         OutlinedTextField(
             value = poste,
             maxLines = 1,
@@ -246,7 +283,7 @@ fun EditProfileScreen(
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
-            value = description,
+            value = description ?: "",
             maxLines = 4,
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -260,7 +297,7 @@ fun EditProfileScreen(
         )
         Row(modifier = Modifier.padding(top = 24.dp)) {
             OutlinedTextField(
-                value = nom,
+                value = nom ?: "",
                 maxLines = 1,
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -272,7 +309,7 @@ fun EditProfileScreen(
                     hasSomethingChanged.value = true
                 })
             OutlinedTextField(
-                value = prenom,
+                value = prenom ?: "",
                 maxLines = 1,
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -286,7 +323,7 @@ fun EditProfileScreen(
         }
 
         OutlinedTextField(
-            value = adresse1,
+            value = adresse1 ?: "",
             maxLines = 1,
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -301,7 +338,7 @@ fun EditProfileScreen(
                 .padding(top = 24.dp),
         )
         OutlinedTextField(
-            value = adresse2,
+            value = adresse2 ?: "",
             maxLines = 1,
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -314,7 +351,7 @@ fun EditProfileScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Row {
-            OutlinedTextField(value = zipCode,
+            OutlinedTextField(value = zipCode ?: "",
                 maxLines = 1,
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -325,7 +362,7 @@ fun EditProfileScreen(
                     cv.zipCode = it
                     hasSomethingChanged.value = true
                 })
-            OutlinedTextField(value = ville,
+            OutlinedTextField(value = ville ?: "",
                 maxLines = 1,
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -339,7 +376,7 @@ fun EditProfileScreen(
         }
 
         OutlinedTextField(
-            value = telephone,
+            value = telephone ?: "",
             maxLines = 1,
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -354,7 +391,7 @@ fun EditProfileScreen(
                 .padding(top = 24.dp),
         )
         OutlinedTextField(
-            value = email,
+            value = email ?: "",
             maxLines = 1,
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -367,7 +404,7 @@ fun EditProfileScreen(
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
-            value = siteWeb,
+            value = siteWeb ?: "",
             maxLines = 1,
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -385,7 +422,7 @@ fun EditProfileScreen(
 @Composable
 fun ComptTechScreen(cv: CV, viewModel: UpdateCvViewModel) {
     val focusManager = LocalFocusManager.current
-    val competenceTechniques = cv.competenceTechniques.toMutableStateList()
+    val competenceTechniques = remember { cv.competenceTechniques.toMutableStateList() }
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -410,7 +447,11 @@ fun ComptTechScreen(cv: CV, viewModel: UpdateCvViewModel) {
             items(items = competenceTechniques, key = { it.id }) { compTech ->
                 var libelle by remember { mutableStateOf(compTech.libelle) }
                 var competence by remember { mutableStateOf(compTech.competence) }
-                var sliderPosition by remember { mutableFloatStateOf(compTech.percent.toFloat()) }
+                var sliderPosition by remember {
+                    mutableFloatStateOf(
+                        compTech.percent?.toFloat() ?: 0f
+                    )
+                }
                 Card(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
@@ -418,7 +459,7 @@ fun ComptTechScreen(cv: CV, viewModel: UpdateCvViewModel) {
                 ) {
                     Column(modifier = Modifier.padding(all = 16.dp)) {
                         OutlinedTextField(
-                            value = libelle,
+                            value = libelle ?: "",
                             maxLines = 1,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
@@ -489,7 +530,7 @@ fun ComptTechScreen(cv: CV, viewModel: UpdateCvViewModel) {
 @Composable
 fun LanguesScreen(cv: CV, viewModel: UpdateCvViewModel) {
     val focusManager = LocalFocusManager.current
-    val langues = cv.langues.toMutableStateList()
+    val langues = remember { cv.langues.toMutableStateList() }
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -522,7 +563,7 @@ fun LanguesScreen(cv: CV, viewModel: UpdateCvViewModel) {
                 ) {
                     Column(modifier = Modifier.padding(all = 16.dp)) {
                         OutlinedTextField(
-                            value = origine,
+                            value = origine ?: "",
                             maxLines = 1,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
@@ -539,7 +580,7 @@ fun LanguesScreen(cv: CV, viewModel: UpdateCvViewModel) {
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
-                            value = niveau,
+                            value = niveau ?: "",
                             maxLines = 1,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
@@ -591,7 +632,7 @@ fun LanguesScreen(cv: CV, viewModel: UpdateCvViewModel) {
 @Composable
 fun ActiviteScreen(cv: CV, viewModel: UpdateCvViewModel) {
     val focusManager = LocalFocusManager.current
-    val autres = cv.autres.toMutableStateList()
+    val autres = remember { cv.autres.toMutableStateList() }
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -623,7 +664,7 @@ fun ActiviteScreen(cv: CV, viewModel: UpdateCvViewModel) {
                 ) {
                     Column(modifier = Modifier.padding(all = 16.dp)) {
                         OutlinedTextField(
-                            value = libelle,
+                            value = libelle ?: "",
                             maxLines = 1,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
@@ -640,7 +681,7 @@ fun ActiviteScreen(cv: CV, viewModel: UpdateCvViewModel) {
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
-                            value = description,
+                            value = description ?: "",
                             maxLines = 1,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
@@ -684,7 +725,7 @@ fun ActiviteScreen(cv: CV, viewModel: UpdateCvViewModel) {
 @Composable
 fun ExperienceScreen(cv: CV, viewModel: UpdateCvViewModel) {
     val focusManager = LocalFocusManager.current
-    val experiences = cv.experiences.toMutableStateList()
+    val experiences = remember { cv.experiences.toMutableStateList() }
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -718,14 +759,14 @@ fun ExperienceScreen(cv: CV, viewModel: UpdateCvViewModel) {
                         .padding(horizontal = 16.dp)
                 ) {
                     Column(modifier = Modifier.padding(all = 16.dp)) {
-                        CustomDatePicker(titre = "Date début", date = dateDebut) { date ->
+                        CustomDatePicker(titre = "Date début", date = dateDebut ?: "") { date ->
                             date?.let {
                                 dateDebut = it
                                 experience.dateDebut = it
                                 hasSomethingChanged.value = true
                             }
                         }
-                        CustomDatePicker(titre = "Date fin", date = dateFin) { date ->
+                        CustomDatePicker(titre = "Date fin", date = dateFin ?: "") { date ->
                             date?.let {
                                 dateFin = it
                                 experience.dateFin = it
@@ -733,7 +774,7 @@ fun ExperienceScreen(cv: CV, viewModel: UpdateCvViewModel) {
                             }
                         }
                         OutlinedTextField(
-                            value = entreprise,
+                            value = entreprise ?: "",
                             maxLines = 1,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
@@ -750,7 +791,7 @@ fun ExperienceScreen(cv: CV, viewModel: UpdateCvViewModel) {
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
-                            value = poste,
+                            value = poste ?: "",
                             maxLines = 1,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
@@ -808,7 +849,7 @@ fun ProjetScreen(projets: List<Projet>) {
                     .padding(horizontal = 8.dp)
             ) {
                 OutlinedTextField(
-                    value = nomProjet,
+                    value = nomProjet ?: "",
                     maxLines = 1,
                     keyboardActions = KeyboardActions(onNext = {
                         focusManager.moveFocus(
@@ -825,7 +866,7 @@ fun ProjetScreen(projets: List<Projet>) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
-                    value = descriptionProjet,
+                    value = descriptionProjet ?: "",
                     maxLines = 4,
                     keyboardActions = KeyboardActions(onNext = {
                         focusManager.moveFocus(
@@ -849,7 +890,7 @@ fun ProjetScreen(projets: List<Projet>) {
 @Composable
 fun FormationScreen(cv: CV, viewModel: UpdateCvViewModel) {
     val focusManager = LocalFocusManager.current
-    val formations = cv.formations.toMutableStateList()
+    val formations = remember { cv.formations.toMutableStateList() }
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -883,14 +924,14 @@ fun FormationScreen(cv: CV, viewModel: UpdateCvViewModel) {
                         .padding(horizontal = 16.dp)
                 ) {
                     Column(modifier = Modifier.padding(all = 16.dp)) {
-                        CustomDatePicker(titre = "Date début", date = dateDebut) { date ->
+                        CustomDatePicker(titre = "Date début", date = dateDebut ?: "") { date ->
                             date?.let {
                                 dateDebut = it
                                 formation.dateDebut = it
                                 hasSomethingChanged.value = true
                             }
                         }
-                        CustomDatePicker(titre = "Date fin", date = dateFin) { date ->
+                        CustomDatePicker(titre = "Date fin", date = dateFin ?: "") { date ->
                             date?.let {
                                 dateFin = it
                                 formation.dateFin = it
@@ -899,7 +940,7 @@ fun FormationScreen(cv: CV, viewModel: UpdateCvViewModel) {
                         }
 
                         OutlinedTextField(
-                            value = etablissement,
+                            value = etablissement ?: "",
                             maxLines = 1,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(
@@ -916,7 +957,7 @@ fun FormationScreen(cv: CV, viewModel: UpdateCvViewModel) {
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
-                            value = description,
+                            value = description ?: "",
                             maxLines = 3,
                             keyboardActions = KeyboardActions(onNext = {
                                 focusManager.moveFocus(

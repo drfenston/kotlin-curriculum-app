@@ -28,11 +28,13 @@ import com.cyrilmaquaire.curriculum.model.responses.ProjetResponse
 import com.cyrilmaquaire.curriculum.model.responses.GetCvListResponse
 import com.cyrilmaquaire.curriculum.model.responses.GetCvResponse
 import com.cyrilmaquaire.curriculum.model.responses.LoginResponse
+import com.cyrilmaquaire.curriculum.model.responses.UploadPhotoResponse
 import com.cyrilmaquaire.curriculum.token
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
@@ -41,8 +43,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 
 
@@ -125,6 +129,10 @@ interface CvApiService {
 
     @DELETE("projet/{projetId}")
     suspend fun deleteProjet(@Path("projetId") cvId: Long?): ProjetResponse
+
+    @Multipart
+    @POST("uploadProfileImage")
+    suspend fun uploadPhoto(@Part upload: MultipartBody.Part): UploadPhotoResponse
 }
 
 /**

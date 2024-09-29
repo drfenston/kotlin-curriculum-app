@@ -22,8 +22,8 @@ class UpdateCvViewModel : ViewModel() {
     fun updateCv(
         cvId: Long,
         cv: CV,
-        onLoginSuccess: (GetCvResponse) -> Unit,
-        onLoginError: (String?) -> Unit
+        onUpdateSuccess: (GetCvResponse) -> Unit,
+        onUpdateError: (String?) -> Unit
     ) {
         loadingState.value = LoadingStates.LOADING
         CoroutineScope(Dispatchers.IO).launch {
@@ -34,10 +34,10 @@ class UpdateCvViewModel : ViewModel() {
                     loadingState.value = LoadingStates.LOADED
 
                     // On déclenche la fonction onLoginSuccess, celle-ci est passée en paramètre
-                    onLoginSuccess(it)
+                    onUpdateSuccess(it)
                 }
             } catch (e: Throwable) {
-                onLoginError(e.message)
+                onUpdateError(e.message)
                 loadingState.value = LoadingStates.ERROR
             }
         }
