@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -242,12 +243,17 @@ fun EditProfileScreen(
             .verticalScroll(rememberScrollState())
     ) {
         ExtendedText(text = stringResource(R.string.profile))
-
+        Box(
+            modifier = Modifier
+                .fillMaxWidth() // Prendre toute la largeur disponible
+                .wrapContentWidth()
+        ) {
         Box(
             modifier = Modifier
                 .size(300.dp)
                 .clip(CircleShape)
                 .background(FenstonBlue)
+                .align(Alignment.Center)
         ) {
             AsyncImage(
                 model = "https://www.cyrilmaquaire.com/curriculum/uploads/$profileImage",
@@ -258,165 +264,166 @@ fun EditProfileScreen(
                     .width(300.dp)
             )
         }
-
-        CapturePhotoScreen(apiService = CvApi.retrofitService) { data ->
-            data.filename?.let {
-                profileImage = it
-                cv.profileImage = it
-                viewModel.updateCv(cvId = cv.id, cv = cv, onUpdateSuccess = {
-                    hasSomethingChanged.value = false
-                }, onUpdateError = { error -> Log.d("coucou", "Error: $error") })
-            }
-        }
-
-        OutlinedTextField(
-            value = poste,
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.poste)) },
-            onValueChange = {
-                poste = it
-                cv.poste = it
-                hasSomethingChanged.value = true
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = description ?: "",
-            maxLines = 4,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.description)) },
-            onValueChange = {
-                description = it
-                cv.description = it
-                hasSomethingChanged.value = true
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Row(modifier = Modifier.padding(top = 24.dp)) {
-            OutlinedTextField(
-                value = nom ?: "",
-                maxLines = 1,
-                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                modifier = Modifier.weight(.5f),
-                label = { Text(stringResource(R.string.nom)) },
-                onValueChange = {
-                    nom = it
-                    cv.nom = it
-                    hasSomethingChanged.value = true
-                })
-            OutlinedTextField(
-                value = prenom ?: "",
-                maxLines = 1,
-                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                modifier = Modifier.weight(.5f),
-                label = { Text(stringResource(R.string.prenom)) },
-                onValueChange = {
-                    prenom = it
-                    cv.prenom = it
-                    hasSomethingChanged.value = true
-                })
-        }
-
-        OutlinedTextField(
-            value = adresse1 ?: "",
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.adresse_1)) },
-            onValueChange = {
-                adresse1 = it
-                cv.adresse1 = it
-                hasSomethingChanged.value = true
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp),
-        )
-        OutlinedTextField(
-            value = adresse2 ?: "",
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.adresse_2)) },
-            onValueChange = {
-                adresse2 = it
-                cv.adresse2 = it
-                hasSomethingChanged.value = true
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Row {
-            OutlinedTextField(value = zipCode ?: "",
-                maxLines = 1,
-                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                label = { Text(stringResource(R.string.code_postal)) },
-                modifier = Modifier.weight(.4f),
-                onValueChange = {
-                    zipCode = it
-                    cv.zipCode = it
-                    hasSomethingChanged.value = true
-                })
-            OutlinedTextField(value = ville ?: "",
-                maxLines = 1,
-                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                modifier = Modifier.weight(1f),
-                label = { Text(stringResource(R.string.ville)) },
-                onValueChange = {
-                    ville = it
-                    cv.city = it
-                    hasSomethingChanged.value = true
-                })
-        }
-
-        OutlinedTextField(
-            value = telephone ?: "",
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.telephone)) },
-            onValueChange = {
-                telephone = it
-                cv.telephone = it
-                hasSomethingChanged.value = true
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp),
-        )
-        OutlinedTextField(
-            value = email ?: "",
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            label = { Text(stringResource(R.string.email)) },
-            onValueChange = {
-                email = it
-                cv.mail = it
-                hasSomethingChanged.value = true
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = siteWeb ?: "",
-            maxLines = 1,
-            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            label = { Text(stringResource(R.string.site_web)) },
-            onValueChange = {
-                siteWeb = it
-                cv.website = it
-                hasSomethingChanged.value = true
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
     }
+
+    CapturePhotoScreen(apiService = CvApi.retrofitService) { data ->
+        data.filename?.let {
+            profileImage = it
+            cv.profileImage = it
+            viewModel.updateCv(cvId = cv.id, cv = cv, onUpdateSuccess = {
+                hasSomethingChanged.value = false
+            }, onUpdateError = { error -> Log.d("coucou", "Error: $error") })
+        }
+    }
+
+    OutlinedTextField(
+        value = poste,
+        maxLines = 1,
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        label = { Text(stringResource(R.string.poste)) },
+        onValueChange = {
+            poste = it
+            cv.poste = it
+            hasSomethingChanged.value = true
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+    OutlinedTextField(
+        value = description ?: "",
+        maxLines = 4,
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        label = { Text(stringResource(R.string.description)) },
+        onValueChange = {
+            description = it
+            cv.description = it
+            hasSomethingChanged.value = true
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+    Row(modifier = Modifier.padding(top = 24.dp)) {
+        OutlinedTextField(
+            value = nom ?: "",
+            maxLines = 1,
+            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            modifier = Modifier.weight(.5f),
+            label = { Text(stringResource(R.string.nom)) },
+            onValueChange = {
+                nom = it
+                cv.nom = it
+                hasSomethingChanged.value = true
+            })
+        OutlinedTextField(
+            value = prenom ?: "",
+            maxLines = 1,
+            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            modifier = Modifier.weight(.5f),
+            label = { Text(stringResource(R.string.prenom)) },
+            onValueChange = {
+                prenom = it
+                cv.prenom = it
+                hasSomethingChanged.value = true
+            })
+    }
+
+    OutlinedTextField(
+        value = adresse1 ?: "",
+        maxLines = 1,
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        label = { Text(stringResource(R.string.adresse_1)) },
+        onValueChange = {
+            adresse1 = it
+            cv.adresse1 = it
+            hasSomethingChanged.value = true
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp),
+    )
+    OutlinedTextField(
+        value = adresse2 ?: "",
+        maxLines = 1,
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        label = { Text(stringResource(R.string.adresse_2)) },
+        onValueChange = {
+            adresse2 = it
+            cv.adresse2 = it
+            hasSomethingChanged.value = true
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+    Row {
+        OutlinedTextField(value = zipCode ?: "",
+            maxLines = 1,
+            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            label = { Text(stringResource(R.string.code_postal)) },
+            modifier = Modifier.weight(.5f),
+            onValueChange = {
+                zipCode = it
+                cv.zipCode = it
+                hasSomethingChanged.value = true
+            })
+        OutlinedTextField(value = ville ?: "",
+            maxLines = 1,
+            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            modifier = Modifier.weight(1f),
+            label = { Text(stringResource(R.string.ville)) },
+            onValueChange = {
+                ville = it
+                cv.city = it
+                hasSomethingChanged.value = true
+            })
+    }
+
+    OutlinedTextField(
+        value = telephone ?: "",
+        maxLines = 1,
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        label = { Text(stringResource(R.string.telephone)) },
+        onValueChange = {
+            telephone = it
+            cv.telephone = it
+            hasSomethingChanged.value = true
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp),
+    )
+    OutlinedTextField(
+        value = email ?: "",
+        maxLines = 1,
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        label = { Text(stringResource(R.string.email)) },
+        onValueChange = {
+            email = it
+            cv.mail = it
+            hasSomethingChanged.value = true
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+    OutlinedTextField(
+        value = siteWeb ?: "",
+        maxLines = 1,
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        label = { Text(stringResource(R.string.site_web)) },
+        onValueChange = {
+            siteWeb = it
+            cv.website = it
+            hasSomethingChanged.value = true
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
 }
 
 @Composable

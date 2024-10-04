@@ -15,7 +15,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,7 +48,7 @@ fun CvListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center)
-                        .padding(8.dp)
+                        .padding(16.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -65,11 +70,15 @@ fun CvListScreen(
                             .fillMaxSize()
                             .padding(all = 12.dp)
                     ) {
+                        val nom = cv.nom?:""
+                        val prenom = cv.prenom?:""
+                        if(nom.isNotEmpty() || prenom.isNotEmpty()) {
                         Text(
-                            text = cv.nom + " " + cv.prenom,
+                            text = "$nom $prenom",
                             style = MaterialTheme.typography.headlineSmall,
                             fontFamily = fontOrbitronFamily
                         )
+                            }
                         Text(text = cv.poste, style = MaterialTheme.typography.titleMedium)
                         Text(
                             text = getExperienceText(cv.debut)?:"",
@@ -81,19 +90,36 @@ fun CvListScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
+
                     TextButton(
                         onClick = {
                             navController.navigate(NavigationItem.Profile.route + "/" + cv.id)
-                        }
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface // Utiliser la couleur de texte par défaut
+                        )
                     ) {
+                        Icon(
+                            imageVector = Icons.Filled.Visibility, // Icône d'œil
+                            contentDescription = "Consulter",
+                            modifier = Modifier.padding(end = 8.dp) // Espace entre l'icône et le texte
+                        )
                         Text("Consulter")
                     }
 
                     TextButton(
                         onClick = {
                             navController.navigate(NavigationItem.Edit.route + "/" + cv.id)
-                        }
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface // Utiliser la couleur de texte par défaut
+                        )
                     ) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit, // Icône de crayon
+                            contentDescription = "Modifier",
+                            modifier = Modifier.padding(end = 8.dp) // Espace entre l'icône et le texte
+                        )
                         Text("Modifier")
                     }
                 }

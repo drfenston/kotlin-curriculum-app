@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,11 +33,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,7 +51,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.cyrilmaquaire.curriculum.R
@@ -188,8 +196,10 @@ fun ResultScreen(cv: CV?, modifier: Modifier = Modifier) {
                     horizontalAlignment = CenterHorizontally
                 ) {
                     it?.let { data ->
+                        val nom = data.nom ?: ""
+                        val prenom = data.prenom ?: ""
                         Text(
-                            text = data.nom + " " + data.prenom,
+                            text = "$nom $prenom",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = fontOrbitronFamily
                         )
@@ -218,77 +228,57 @@ fun ResultScreen(cv: CV?, modifier: Modifier = Modifier) {
 
 @Composable
 fun DescriptionCard(cv: CV) {
-    Text(
-        text = cv.description ?: "",
-        modifier = Modifier.padding(16.dp),
-        style = MaterialTheme.typography.headlineSmall,
-        fontFamily = fontAntonioFamily
-    )
-}
-
-@Composable
-fun LangueCard(langues: List<Langue>) {
-    Column {
-        ExtendedText(text = stringResource(R.string.langues))
-        for (langue in langues) {
-            Row(Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = langue.origine ?: "",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(end = 16.dp)
+    if (!cv.description.isNullOrEmpty()) {
+        Box(
+            modifier = Modifier
+                .padding(vertical = 16.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primaryContainer, // Couleur de fond
+                    shape = MaterialTheme.shapes.small // Arrondir les bords
                 )
-                LinearProgressIndicator(
-                    progress = { langue.percent.toFloat() / 100 }, modifier = Modifier.fillMaxSize()
-                )
-            }
+                .padding(16.dp).fillMaxWidth() // Ajout d'un espacement intérieur
+        ) {
+            Text(
+                text = cv.description ?: "",
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.headlineSmall,
+                fontFamily = fontAntonioFamily
+            )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CompetenceTechniqueCard(competencesTechniques: List<CompetenceTechnique>) {
-    Column(modifier = Modifier.padding(vertical = 12.dp)) {
-        ExtendedText(text = stringResource(R.string.competences_techniques))
-        FlowRow(
-            modifier = Modifier
-                .padding(horizontal = 12.dp)
-                .padding(top = 12.dp)
-                .padding(horizontal = 12.dp)
-                .padding(top = 12.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
-        ) {
-            for (competenceTechnique in competencesTechniques) {
-                Column(horizontalAlignment = CenterHorizontally) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        AsyncImage(
-                            model = "https://www.cyrilmaquaire.com/curriculum/uploads/" + competenceTechnique.libelle + ".png",
-                            contentDescription = "Translated description of what the image contains",
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier
-                                .height(60.dp)
-                                .width(60.dp),
-                        )
-                    }
+fun LangueCard(langues: List<Langue>) {
+    if (langues.isNotEmpty()) {
+        Column {
+            val textColor = MaterialTheme.colorScheme.onSurface
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_langues),
+                    contentDescription = "Icône des langues", // Description pour l'accessibilité
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(end = 8.dp),
+                    colorFilter = ColorFilter.tint(textColor) // Teinte l'image avec la couleur du texte
+
+                )
+
+                ExtendedText(
+                    text = stringResource(R.string.langues)
+                )
+            }
+            for (langue in langues) {
+                Row(Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = competenceTechnique.libelle ?: "",
-                        style = MaterialTheme.typography.titleMedium
+                        text = langue.origine ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(end = 16.dp)
                     )
-                    competenceTechnique.competence?.let {
-                        Text(
-                            text = it,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
+                    LinearProgressIndicator(
+                        progress = { langue.percent.toFloat() / 100 },
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
         }
@@ -297,38 +287,152 @@ fun CompetenceTechniqueCard(competencesTechniques: List<CompetenceTechnique>) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AutresCard(autres: List<Autre>) {
-    Column(modifier = Modifier.padding(vertical = 12.dp)) {
-        ExtendedText(text = stringResource(R.string.activites))
-        FlowRow(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround,
-            maxItemsInEachRow = 2
-        ) {
-            for (autre in autres) {
-                Column(horizontalAlignment = CenterHorizontally) {
-                    Box(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .background(color = Color.White), contentAlignment = Alignment.Center
-                    ) {
-                        AsyncImage(
-                            model = "https://www.cyrilmaquaire.com/curriculum/uploads/" + autre.libelle + ".png",
-                            contentDescription = "Image de " + autre.libelle,
-                            contentScale = ContentScale.FillBounds,
+fun CompetenceTechniqueCard(competencesTechniques: List<CompetenceTechnique>) {
+    if (competencesTechniques.isNotEmpty()) {
+        Column(modifier = Modifier.padding(vertical = 12.dp)) {
+            val textColor = MaterialTheme.colorScheme.onSurface
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_comptech),
+                    contentDescription = "Icône competence technique", // Description pour l'accessibilité
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(end = 8.dp),
+                    colorFilter = ColorFilter.tint(textColor) // Teinte l'image avec la couleur du texte
+
+                )
+                ExtendedText(text = stringResource(R.string.competences_techniques))
+            }
+            FlowRow(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 12.dp)
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 12.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+            ) {
+                for (competenceTechnique in competencesTechniques) {
+                    Column(horizontalAlignment = CenterHorizontally) {
+                        Box(
                             modifier = Modifier
-                                .height(80.dp)
-                                .width(80.dp),
+                                .size(80.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CustomAsyncImage(
+                                imageUrl = "https://www.cyrilmaquaire.com/curriculum/uploads/${competenceTechnique.libelle}.png",
+                                fallbackImageResId = R.drawable.comptech_default, // Remplace par l'ID de ta ressource drawable
+                                contentDescription = competenceTechnique.libelle,
+                                size = 60.dp
+                            )
+
+                        }
+                        Text(
+                            text = competenceTechnique.libelle ?: "",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        competenceTechnique.competence?.let {
+                            Text(
+                                text = it,
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomAsyncImage(
+    imageUrl: String,
+    fallbackImageResId: Int,
+    contentDescription: String?,
+    size: Dp
+) {
+    val finalImageUrl by remember { mutableStateOf(imageUrl) }
+    var hasError by remember { mutableStateOf(false) }
+
+    AsyncImage(
+        model = finalImageUrl,
+        contentDescription = contentDescription,
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .height(size)
+            .width(size),
+        onSuccess = {
+            hasError = false // Réinitialiser l'erreur si le chargement réussit
+        },
+        onError = {
+            hasError = true // En cas d'erreur
+        }
+    )
+
+    // Affiche l'image locale si une erreur s'est produite
+    if (hasError) {
+        Image(
+            painter = painterResource(id = fallbackImageResId),
+            contentDescription = contentDescription,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .height(size)
+                .width(size)
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun AutresCard(autres: List<Autre>) {
+    if (autres.isNotEmpty()) {
+        Column(modifier = Modifier.padding(vertical = 12.dp)) {
+            val textColor = MaterialTheme.colorScheme.onSurface
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_activites),
+                    contentDescription = "Icône autre", // Description pour l'accessibilité
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(end = 8.dp),
+                    colorFilter = ColorFilter.tint(textColor) // Teinte l'image avec la couleur du texte
+
+                )
+                ExtendedText(text = stringResource(R.string.activites))
+            }
+            FlowRow(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                maxItemsInEachRow = 2
+            ) {
+                for (autre in autres) {
+                    Column(horizontalAlignment = CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .background(color = Color.White),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CustomAsyncImage(
+                                imageUrl = "https://www.cyrilmaquaire.com/curriculum/uploads/${autre.libelle}.png",
+                                fallbackImageResId = R.drawable.activity_default, // Remplace par l'ID de ta ressource drawable
+                                contentDescription = autre.libelle,
+                                size = 80.dp
+                            )
+                        }
+                        Text(
+                            text = autre.libelle ?: "",
+                            modifier = Modifier.padding(bottom = 12.dp),
+                            style = MaterialTheme.typography.titleMedium
                         )
                     }
-                    Text(
-                        text = autre.libelle ?: "",
-                        modifier = Modifier.padding(bottom = 12.dp),
-                        style = MaterialTheme.typography.titleMedium
-                    )
                 }
             }
         }
@@ -338,67 +442,126 @@ fun AutresCard(autres: List<Autre>) {
 @Composable
 fun ContactCard(cv: CV) {
     val context = LocalContext.current
+    val adresse1 = cv.adresse1 ?: ""
+    val adresse2 = cv.adresse2 ?: ""
+    val zipCode = cv.zipCode ?: ""
+    val city = cv.city ?: ""
+    val telephone = cv.telephone
+    val mail = cv.mail
+    val website = cv.website
+
     Row(
         Modifier
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(8.dp)
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
             )
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(bottom = 16.dp)
     ) {
-        Column {
-            ExtendedText(text = stringResource(R.string.contact))
 
-            Row {
-                Icon(
-                    imageVector = Icons.Outlined.Phone,
-                    contentDescription = "Phone",
-                    Modifier.padding(horizontal = 16.dp)
-                )
-                Text(text = cv.telephone ?: "")
-            }
+        if (adresse1.isEmpty() && adresse2.isEmpty() && zipCode.isEmpty() && city.isEmpty() && telephone.isNullOrEmpty() && mail.isNullOrEmpty() && website.isNullOrEmpty()) {
+            Text(text = "Aucune information renseignée", modifier = Modifier.padding(top = 16.dp))
+        } else {
+            Column {
+                val textColor = MaterialTheme.colorScheme.onSurface
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.icon_contact),
+                        contentDescription = "Icône contact", // Description pour l'accessibilité
+                        modifier = Modifier
+                            .size(32.dp)
+                            .padding(end = 8.dp),
+                        colorFilter = ColorFilter.tint(textColor) // Teinte l'image avec la couleur du texte
 
-            Row {
-                Icon(
-                    imageVector = Icons.Outlined.Email,
-                    contentDescription = "Email",
-                    Modifier.padding(horizontal = 16.dp)
-                )
-                Text(text = cv.mail ?: "")
-            }
-            Row {
-                Icon(
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = "Website",
-                    Modifier.padding(horizontal = 16.dp)
-                )
-                LinkText(
-                    linkTextData = listOf(
-                        LinkTextData(
-                            text = cv.website ?: "",
-                            tag = "icon_1_author",
-                            annotation = "http://" + cv.website,
-                            onClick = {
-                                val i = Intent(Intent.ACTION_VIEW)
-                                i.setData(Uri.parse(it.item))
-                                context.startActivity(i)
-                            },
-                        )
                     )
-                )
-            }
-            Row {
-                Icon(
-                    imageVector = Icons.Outlined.Place,
-                    contentDescription = "Mail",
-                    Modifier.padding(horizontal = 16.dp)
-                )
-                Box {
-                    Column {
-                        Text(text = cv.adresse1 ?: "")
-                        if (cv.adresse2?.isNotEmpty() == true) Text(text = cv.adresse2 ?: "")
-                        Text(text = cv.zipCode + " " + cv.city)
+                    ExtendedText(text = stringResource(R.string.contact))
+                }
+                telephone?.let {
+                    Row(
+                        modifier = Modifier
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$telephone"))
+                                context.startActivity(intent)
+                            }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Phone,
+                            contentDescription = stringResource(R.string.telephone),
+                            Modifier.padding(horizontal = 16.dp)
+                        )
+                        Text(
+                            text = telephone,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
+                    }
+                }
+
+                mail?.let {
+                    Row(
+                        modifier = Modifier
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                    data = Uri.parse("mailto:$mail")
+                                }
+                                context.startActivity(intent)
+                            }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Email,
+                            contentDescription = stringResource(R.string.email),
+                            Modifier.padding(horizontal = 16.dp)
+                        )
+                        Text(
+                            text = mail,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
+                    }
+                }
+
+                website?.let {
+                    Row {
+                        Icon(
+                            imageVector = Icons.Outlined.Person,
+                            contentDescription = stringResource(R.string.website),
+                            Modifier.padding(horizontal = 16.dp)
+                        )
+                        LinkText(
+                            linkTextData = listOf(
+                                LinkTextData(
+                                    text = website,
+                                    tag = "icon_1_author",
+                                    annotation = "http://$website",
+                                    onClick = {
+                                        val i = Intent(Intent.ACTION_VIEW)
+                                        i.setData(Uri.parse(it.item))
+                                        context.startActivity(i)
+                                    },
+                                )
+                            )
+                        )
+                    }
+                }
+
+                if (adresse1.isNotEmpty() || adresse2.isNotEmpty() || zipCode.isNotEmpty() || city.isNotEmpty()) {
+                    Row {
+                        Icon(
+                            imageVector = Icons.Outlined.Place,
+                            contentDescription = "Mail",
+                            Modifier.padding(horizontal = 16.dp)
+                        )
+                        Box {
+                            Column {
+                                if (adresse1.isNotEmpty()) Text(text = adresse1)
+                                if (adresse2.isNotEmpty()) Text(text = adresse2)
+                                if (zipCode.isNotEmpty() || city.isNotEmpty()) Text(text = cv.zipCode + " " + cv.city)
+                            }
+                        }
                     }
                 }
             }
@@ -408,73 +571,112 @@ fun ContactCard(cv: CV) {
 
 @Composable
 fun ExperienceCard(experiences: List<Experience>) {
-    Column {
-        ExtendedText(text = stringResource(R.string.experience))
-        for (experience in experiences.sortedByDescending { parseDate(it.dateDebut ?: "")?.year }) {
-            val dateDebut = parseDate(experience.dateDebut ?: "")
-            val dateFin = parseDate(experience.dateFin ?: "")
-            DateText(
-                text = moisAbreges[(dateDebut?.monthValue
-                    ?: 1) - 1] + " " + dateDebut?.year + " - " + moisAbreges[(dateFin?.monthValue
-                    ?: 1) - 1] + " " + dateFin?.year
-            )
-            Text(text = experience.entreprise ?: "", style = MaterialTheme.typography.titleLarge)
-            Text(
-                text = experience.poste ?: "",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Box(modifier = Modifier.padding(all = 8.dp)) {
-                Column {
-                    for (projet in experience.projets) {
-                        Row {
-                            Icon(
-                                imageVector = Icons.Filled.PlayArrow,
-                                contentDescription = "Email",
-                                Modifier.padding(end = 16.dp)
-                            )
+    if (experiences.isNotEmpty()) {
+        Column {
+            val textColor = MaterialTheme.colorScheme.onSurface
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_experience),
+                    contentDescription = "Icône experiences", // Description pour l'accessibilité
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(end = 8.dp),
+                    colorFilter = ColorFilter.tint(textColor) // Teinte l'image avec la couleur du texte
+
+                )
+                ExtendedText(text = stringResource(R.string.experience))
+            }
+            for (experience in experiences.sortedByDescending {
+                parseDate(
+                    it.dateDebut ?: ""
+                )?.year
+            }) {
+                val dateDebut = parseDate(experience.dateDebut ?: "")
+                val dateFin = parseDate(experience.dateFin ?: "")
+                DateText(
+                    text = moisAbreges[(dateDebut?.monthValue
+                        ?: 1) - 1] + " " + dateDebut?.year + " - " + moisAbreges[(dateFin?.monthValue
+                        ?: 1) - 1] + " " + dateFin?.year
+                )
+                Text(
+                    text = experience.entreprise ?: "",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = experience.poste ?: "",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Box(modifier = Modifier.padding(all = 8.dp)) {
+                    Column {
+                        for (projet in experience.projets) {
+                            Row {
+                                Icon(
+                                    imageVector = Icons.Filled.PlayArrow,
+                                    contentDescription = "Email",
+                                    Modifier.padding(end = 16.dp)
+                                )
+                                Text(
+                                    text = "Projet " + projet.nom,
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
+
                             Text(
-                                text = "Projet " + projet.nom,
-                                style = MaterialTheme.typography.titleMedium,
+                                text = projet.description ?: "",
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
                         }
-
-                        Text(
-                            text = projet.description ?: "",
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
                     }
                 }
-            }
 
+            }
         }
     }
 }
 
 @Composable
 fun FormationCard(formations: List<Formation>) {
-    Column {
-        ExtendedText(text = stringResource(R.string.education))
-        for (formation in formations.sortedByDescending { parseDate(it.dateDebut ?: "")?.year }) {
-            val dateDebut = parseDate(formation.dateDebut ?: "")
-            val dateFin = parseDate(formation.dateFin ?: "")
-            DateText(
-                text = moisAbreges[(dateDebut?.monthValue
-                    ?: 1) - 1] + " " + dateDebut?.year + " - " + moisAbreges[(dateFin?.monthValue
-                    ?: 1) - 1] + " " + dateFin?.year
-            )
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = formation.etablissement ?: "",
-                    style = MaterialTheme.typography.titleMedium,
+    if (formations.isNotEmpty()) {
+        Column {
+            val textColor = MaterialTheme.colorScheme.onSurface
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_education),
+                    contentDescription = "Icône education", // Description pour l'accessibilité
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(end = 8.dp),
+                    colorFilter = ColorFilter.tint(textColor) // Teinte l'image avec la couleur du texte
+
                 )
-                Text(
-                    text = formation.description ?: "",
+                ExtendedText(text = stringResource(R.string.education))
+            }
+            for (formation in formations.sortedByDescending {
+                parseDate(
+                    it.dateDebut ?: ""
+                )?.year
+            }) {
+                val dateDebut = parseDate(formation.dateDebut ?: "")
+                val dateFin = parseDate(formation.dateFin ?: "")
+                DateText(
+                    text = moisAbreges[(dateDebut?.monthValue
+                        ?: 1) - 1] + " " + dateDebut?.year + " - " + moisAbreges[(dateFin?.monthValue
+                        ?: 1) - 1] + " " + dateFin?.year
                 )
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 16.dp)
+                ) {
+                    Text(
+                        text = formation.etablissement ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = formation.description ?: "",
+                    )
+                }
             }
         }
     }

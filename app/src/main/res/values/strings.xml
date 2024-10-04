@@ -12,7 +12,7 @@
     <string name="contact">Contact</string>
     <string name="experience">Experience</string>
     <string name="projets">Projets</string>
-    <string name="education">Education</string>
+    <string name="education">Etudes</string>
     <string name="_15ans_d_experience">15ans d\'expérience</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
@@ -31,4 +31,5 @@
     <string name="telephone">Téléphone</string>
     <string name="email">Email</string>
     <string name="site_web">Site Web</string>
+    <string name="website">Website</string>
 </resources>

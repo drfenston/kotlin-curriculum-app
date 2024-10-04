@@ -4,6 +4,7 @@ coilCompose = "2.7.0"
 converterGson = "2.2.0"
 converterScalars = "2.9.0"
 datastorePreferences = "1.1.1"
+gradle = "8.0.2"
 gson = "2.10.1"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
@@ -36,6 +37,7 @@ androidx-material-icons-extended-android = { module = "androidx.compose.material
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "converterScalars" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
